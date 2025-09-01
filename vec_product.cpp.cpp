@@ -25,7 +25,7 @@ float VecProduct::VectorDotImpl(const float* __restrict q, const float* __restri
         sum = _mm512_fmadd_ps(qVec, kVec, sum);
     }
 
-    // AVX512内置规约指令
+    // AVX512内置归约指令
     float result = _mm512_reduce_add_ps(sum);
 
     // 处理剩余元素
@@ -98,7 +98,7 @@ float VecProduct::VectorDotImpl(const float* __restrict q, const float* __restri
         sum = _mm256_fmadd_ps(qVec, kVec, sum);
     }
 
-    // 向量规约求和
+    // 向量归约求和
     const __m128 sumHigh = _mm256_extractf128_ps(sum, 1);
     __m128 sumLow = _mm256_extractf128_ps(sum, 0);
     sumLow = _mm_add_ps(sumHigh, sumLow);
@@ -177,7 +177,7 @@ float VecProduct::VectorDotImpl(const float* __restrict q, const float* __restri
         sum = _mm_add_ps(sum, _mm_mul_ps(qVec, kVec));
     }
 
-    // 向量规约求和
+    // 向量归约求和
     sum = _mm_hadd_ps(sum, sum);
     sum = _mm_hadd_ps(sum, sum);
     float result = _mm_cvtss_f32(sum);
@@ -253,7 +253,7 @@ float VecProduct::VectorDotImpl(const float* __restrict q, const float* __restri
         sum = vmlaq_f32(sum, qVec, kVec);
     }
 
-    // 向量规约求和
+    // 向量归约求和
     float result = vaddvq_f32(sum);
 
     // 处理剩余元素
@@ -351,7 +351,7 @@ void VecProduct::VectorMeanImpl(const float* __restrict vectors, float* __restri
     // mean初始化为vectors中第一个向量
     std::memcpy(mean, vectors, sizeof(float) * dim);
 
-    const float invNumK = _mm256_set1_ps(1.0f / static_cast<float>(numK));
+    const float invNumK = 1.0f / static_cast<float>(numK);
 
     // 累加所有向量
     for (uint32_t k = 1; k < numK; ++k) {
@@ -373,12 +373,12 @@ void VecProduct::VectorMeanImpl(const float* __restrict vectors, float* __restri
     }    
 
     // 计算均值
-    i = 0;
+    uint32_t i = 0;
     for (; i + SCALAR_UNROLL_FACTOR <= dim; i += SCALAR_UNROLL_FACTOR) {
-        mean[i]   += currentVec[i] * invNumK;
-        mean[i+1] += currentVec[i+1] * invNumK;
-        mean[i+2] += currentVec[i+2] * invNumK;
-        mean[i+3] += currentVec[i+3] * invNumK;
+        mean[i]   += mean[i] * invNumK;
+        mean[i+1] += mean[i+1] * invNumK;
+        mean[i+2] += mean[i+2] * invNumK;
+        mean[i+3] += mean[i+3] * invNumK;
     }
 
     for (; i < dim; ++i) {
