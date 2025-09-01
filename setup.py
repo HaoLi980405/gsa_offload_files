@@ -51,5 +51,5 @@ setup(
     name='gsa_offload_ops',
     version='0.1',
     ext_modules=[ext_module],
-
 )
+
