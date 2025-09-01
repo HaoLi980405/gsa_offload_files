@@ -351,7 +351,7 @@ void VecProduct::VectorMeanImpl(const float* __restrict vectors, float* __restri
     // mean初始化为vectors中第一个向量
     std::memcpy(mean, vectors, sizeof(float) * dim);
 
-    const float invNumK = 1.0f / static_cast<float>(numK);
+    const float invNumK = 1.0 / static_cast<float>(numK);
 
     // 累加所有向量
     for (uint32_t k = 1; k < numK; ++k) {
@@ -375,14 +375,14 @@ void VecProduct::VectorMeanImpl(const float* __restrict vectors, float* __restri
     // 计算均值
     uint32_t i = 0;
     for (; i + SCALAR_UNROLL_FACTOR <= dim; i += SCALAR_UNROLL_FACTOR) {
-        mean[i]   += mean[i] * invNumK;
-        mean[i+1] += mean[i+1] * invNumK;
-        mean[i+2] += mean[i+2] * invNumK;
-        mean[i+3] += mean[i+3] * invNumK;
+        mean[i]   = mean[i] * invNumK;
+        mean[i+1] = mean[i+1] * invNumK;
+        mean[i+2] = mean[i+2] * invNumK;
+        mean[i+3] = mean[i+3] * invNumK;
     }
 
     for (; i < dim; ++i) {
-        mean[i] *= (1.0f / static_cast<float>(numK));
+        mean[i] *= invNumK;
     }
 }
 #endif
