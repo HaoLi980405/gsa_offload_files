@@ -15,18 +15,18 @@ namespace VecProduct {
 // ============= AVX512实现 =============
 float VecProduct::VectorDotImpl(const float* __restrict q, const float* __restrict k, uint32_t dim)
 {
-    __m512 sum = __mm512_setzero_ps();
+    __m512 sum = _mm512_setzero_ps();
     uint32_t i = 0;
     
     // 512位向量化计算，使用FMA指令
     for (; i + SimdElements::VEC16 <= dim; i += SimdElements::VEC16) {
-        const __m512 qVec = __mm512_loadu_ps(&q[i]);
-        const __m512 kVec = __mm512_loadu_ps(&k[i]);
-        sum = __mm512_fmadd_ps(qVec, kVec, sum);
+        const __m512 qVec = _mm512_loadu_ps(&q[i]);
+        const __m512 kVec = _mm512_loadu_ps(&k[i]);
+        sum = _mm512_fmadd_ps(qVec, kVec, sum);
     }
 
     // AVX512内置规约指令
-    float result = __mm512_reduce_add_ps(sum);
+    float result = _mm512_reduce_add_ps(sum);
 
     // 处理剩余元素
     for (; i < dim; ++i) {
@@ -43,12 +43,12 @@ void VecProduct::VecMeanImpl(const float* __restrict vectors, float* __restrict 
         return;
     }
 
-    const __m512 invNumK = __mm512_set1_ps(1.0f / static_cast<float>(numK));
+    const __m512 invNumK = _mm512_set1_ps(1.0f / static_cast<float>(numK));
     uint32_t i = 0;
 
     // mean初始化为vectors中第一个向量
     for (; i + SimdElements::VEC16 <= dim; i += SimdElements::VEC16) {
-        __mm512_storeu_ps(&mean[i], __mm512_loadu_ps(&vectors[i]));
+        _mm512_storeu_ps(&mean[i], _mm512_loadu_ps(&vectors[i]));
     }
     for (; i < dim; ++i) {
         mean[i] = vectors[i];
@@ -61,9 +61,9 @@ void VecProduct::VecMeanImpl(const float* __restrict vectors, float* __restrict 
 
         // 向量化累加
         for (; i + SimdElements::VEC16 <= dim; i += SimdElements::VEC16) {
-            const __m512 meanVec = __mm512_loadu_ps(&mean[i]);
-            const __m512 currentVecAvx512 = __mm512_loadu_ps(&currentVec[i]);
-            __mm512_storeu_ps(&mean[i], __mm512_add_ps(meanVec, currentVecAvx512));
+            const __m512 meanVec = _mm512_loadu_ps(&mean[i]);
+            const __m512 currentVecAvx512 = _mm512_loadu_ps(&currentVec[i]);
+            _mm512_storeu_ps(&mean[i], _mm512_add_ps(meanVec, currentVecAvx512));
         }
 
         // 处理剩余元素
@@ -74,8 +74,8 @@ void VecProduct::VecMeanImpl(const float* __restrict vectors, float* __restrict 
         // 计算均值
         i = 0;
         for (; i + SimdElements::VEC16 <= dim; i += SimdElements::VEC16) {
-            const __m512 sumVec = __mm512_loadu_ps(&mean[i]);
-            __mm512_storeu_ps(&mean[i], __mm512_mul_ps(sumVec, invNumK));
+            const __m512 sumVec = _mm512_loadu_ps(&mean[i]);
+            _mm512_storeu_ps(&mean[i], _mm512_mul_ps(sumVec, invNumK));
         }
 
         for (; i < dim; ++i) {
@@ -88,24 +88,24 @@ void VecProduct::VecMeanImpl(const float* __restrict vectors, float* __restrict 
 // ============= AVX2实现 =============
 float VecProduct::VectorDotImpl(const float* __restrict q, const float* __restrict k, uint32_t dim)
 {
-    __m256 sum = __mm256_setzero_ps();
+    __m256 sum = _mm256_setzero_ps();
     uint32_t i = 0;
     
     // 256位向量化计算，使用FMA指令
     for (; i + SimdElements::VEC8 <= dim; i += SimdElements::VEC8) {
-        const __m256 qVec = __mm256_loadu_ps(&q[i]);
-        const __m256 kVec = __mm256_loadu_ps(&k[i]);
-        sum = __mm256_fmadd_ps(qVec, kVec, sum);
+        const __m256 qVec = _mm256_loadu_ps(&q[i]);
+        const __m256 kVec = _mm256_loadu_ps(&k[i]);
+        sum = _mm256_fmadd_ps(qVec, kVec, sum);
     }
 
     // 向量规约求和
-    const __m128 sumHigh = __mm256_extractf128_ps(sum, 1);
-    __m128 sumLow = __mm256_extractf128_ps(sum, 0);
-    sumLow = __mm_add_ps(sumHigh, sumLow);
-    sumLow = __mm_hadd_ps(sumLow, sumLow);
-    sumLow = __mm_hadd_ps(sumLow, sumLow);
+    const __m128 sumHigh = _mm256_extractf128_ps(sum, 1);
+    __m128 sumLow = _mm256_extractf128_ps(sum, 0);
+    sumLow = _mm_add_ps(sumHigh, sumLow);
+    sumLow = _mm_hadd_ps(sumLow, sumLow);
+    sumLow = _mm_hadd_ps(sumLow, sumLow);
 
-    float result = __mm_cvtss_f32(sumLow);
+    float result = _mm_cvtss_f32(sumLow);
 
     // 处理剩余元素
     for (; i < dim; ++i) {
@@ -122,12 +122,12 @@ void VecProduct::VecMeanImpl(const float* __restrict vectors, float* __restrict 
         return;
     }
 
-    const __m256 invNumK = __mm256_set1_ps(1.0f / static_cast<float>(numK));
+    const __m256 invNumK = _mm256_set1_ps(1.0f / static_cast<float>(numK));
     uint32_t i = 0;
 
     // mean初始化为vectors中第一个向量
     for (; i + SimdElements::VEC8 <= dim; i += SimdElements::VEC8) {
-        __mm256_storeu_ps(&mean[i], __mm256_loadu_ps(&vectors[i]));
+        _mm256_storeu_ps(&mean[i], _mm256_loadu_ps(&vectors[i]));
     }
     for (; i < dim; ++i) {
         mean[i] = vectors[i];
@@ -140,9 +140,9 @@ void VecProduct::VecMeanImpl(const float* __restrict vectors, float* __restrict 
 
         // 向量化累加
         for (; i + SimdElements::VEC8 <= dim; i += SimdElements::VEC8) {
-            const __m256 meanVec = __mm256_loadu_ps(&mean[i]);
-            const __m256 currentVecAvx = __mm256_loadu_ps(&currentVec[i]);
-            __mm256_storeu_ps(&mean[i], __mm256_add_ps(meanVec, currentVecAvx));
+            const __m256 meanVec = _mm256_loadu_ps(&mean[i]);
+            const __m256 currentVecAvx = _mm256_loadu_ps(&currentVec[i]);
+            _mm256_storeu_ps(&mean[i], _mm256_add_ps(meanVec, currentVecAvx));
         }
 
         // 处理剩余元素
@@ -153,8 +153,8 @@ void VecProduct::VecMeanImpl(const float* __restrict vectors, float* __restrict 
         // 计算均值
         i = 0;
         for (; i + SimdElements::VEC8 <= dim; i += SimdElements::VEC8) {
-            const __m256 sumVec = __mm256_loadu_ps(&mean[i]);
-            __mm256_storeu_ps(&mean[i], __mm256_mul_ps(sumVec, invNumK));
+            const __m256 sumVec = _mm256_loadu_ps(&mean[i]);
+            _mm256_storeu_ps(&mean[i], _mm256_mul_ps(sumVec, invNumK));
         }
 
         for (; i < dim; ++i) {
@@ -167,20 +167,20 @@ void VecProduct::VecMeanImpl(const float* __restrict vectors, float* __restrict 
 // ============= SSE2实现 =============
 float VecProduct::VectorDotImpl(const float* __restrict q, const float* __restrict k, uint32_t dim)
 {
-    __m128 sum = __mm_setzero_ps();
+    __m128 sum = _mm_setzero_ps();
     uint32_t i = 0;
     
     // 128位向量化计算
     for (; i + SimdElements::VEC4 <= dim; i += SimdElements::VEC4) {
-        const __m128 qVec = __mm_loadu_ps(&q[i]);
-        const __m128 kVec = __mm_loadu_ps(&k[i]);
-        sum = __mm_add_ps(sum, __mm_mul_ps(qVec, kVec));
+        const __m128 qVec = _mm_loadu_ps(&q[i]);
+        const __m128 kVec = _mm_loadu_ps(&k[i]);
+        sum = _mm_add_ps(sum, _mm_mul_ps(qVec, kVec));
     }
 
     // 向量规约求和
-    sum = __mm_hadd_ps(sum, sum);
-    sum = __mm_hadd_ps(sum, sum);
-    float result = __mm_cvtss_f32(sum);
+    sum = _mm_hadd_ps(sum, sum);
+    sum = _mm_hadd_ps(sum, sum);
+    float result = _mm_cvtss_f32(sum);
 
     // 处理剩余元素
     for (; i < dim; ++i) {
@@ -197,12 +197,12 @@ void VecProduct::VecMeanImpl(const float* __restrict vectors, float* __restrict 
         return;
     }
 
-    const __m128 invNumK = __mm256_set1_ps(1.0f / static_cast<float>(numK));
+    const __m128 invNumK = _mm256_set1_ps(1.0f / static_cast<float>(numK));
     uint32_t i = 0;
 
     // mean初始化为vectors中第一个向量
     for (; i + SimdElements::VEC4 <= dim; i += SimdElements::VEC4) {
-        __mm_storeu_ps(&mean[i], __mm_loadu_ps(&vectors[i]));
+        _mm_storeu_ps(&mean[i], _mm_loadu_ps(&vectors[i]));
     }
     for (; i < dim; ++i) {
         mean[i] = vectors[i];
@@ -215,9 +215,9 @@ void VecProduct::VecMeanImpl(const float* __restrict vectors, float* __restrict 
 
         // 向量化累加
         for (; i + SimdElements::VEC4 <= dim; i += SimdElements::VEC4) {
-            const __m128 meanVec = __mm_loadu_ps(&mean[i]);
-            const __m128 currentVecSse = __mm_loadu_ps(&currentVec[i]);
-            __mm_storeu_ps(&mean[i], __mm_add_ps(meanVec, currentVecSse));
+            const __m128 meanVec = _mm_loadu_ps(&mean[i]);
+            const __m128 currentVecSse = _mm_loadu_ps(&currentVec[i]);
+            _mm_storeu_ps(&mean[i], _mm_add_ps(meanVec, currentVecSse));
         }
 
         // 处理剩余元素
@@ -228,8 +228,8 @@ void VecProduct::VecMeanImpl(const float* __restrict vectors, float* __restrict 
         // 计算均值
         i = 0;
         for (; i + SimdElements::VEC4 <= dim; i += SimdElements::VEC4) {
-            const __m128 sumVec = __mm_loadu_ps(&mean[i]);
-            __mm_storeu_ps(&mean[i], __mm_mul_ps(sumVec, invNumK));
+            const __m128 sumVec = _mm_loadu_ps(&mean[i]);
+            _mm_storeu_ps(&mean[i], _mm_mul_ps(sumVec, invNumK));
         }
 
         for (; i < dim; ++i) {
@@ -351,7 +351,7 @@ void VecProduct::VecMeanImpl(const float* __restrict vectors, float* __restrict 
     // mean初始化为vectors中第一个向量
     std::memcpy(mean, vectors, sizeof(float) * dim);
 
-    const float invNumK = __mm256_set1_ps(1.0f / static_cast<float>(numK));
+    const float invNumK = _mm256_set1_ps(1.0f / static_cast<float>(numK));
 
     // 累加所有向量
     for (uint32_t k = 1; k <= numK; ++k) {
