@@ -36,7 +36,7 @@ float VecProduct::VectorDotImpl(const float* __restrict q, const float* __restri
     return result;
 }
 
-void VecProduct::VecMeanImpl(const float* __restrict vectors, float* __restrict mean. uint32_t dim, uint32_t numK)
+void VecProduct::VectorMeanImpl(const float* __restrict vectors, float* __restrict mean. uint32_t dim, uint32_t numK)
 {
     if (numK == 0) {
         std::fill(mean, mean + dim, 0.0f);
@@ -55,7 +55,7 @@ void VecProduct::VecMeanImpl(const float* __restrict vectors, float* __restrict 
     }
 
     // 累加所有向量
-    for (uint32_t k = 1; k <= numK; ++k) {
+    for (uint32_t k = 1; k < numK; ++k) {
         const float* currentVec = vectors + k * dim;
         i = 0;
 
@@ -70,21 +70,21 @@ void VecProduct::VecMeanImpl(const float* __restrict vectors, float* __restrict 
         for (; i < dim; ++i) {
             mean[i] += currentVec[i];
         }
+    }
 
-        // 计算均值
-        i = 0;
-        for (; i + SimdElements::VEC16 <= dim; i += SimdElements::VEC16) {
-            const __m512 sumVec = _mm512_loadu_ps(&mean[i]);
-            _mm512_storeu_ps(&mean[i], _mm512_mul_ps(sumVec, invNumK));
-        }
+    // 计算均值
+    i = 0;
+    for (; i + SimdElements::VEC16 <= dim; i += SimdElements::VEC16) {
+        const __m512 sumVec = _mm512_loadu_ps(&mean[i]);
+        _mm512_storeu_ps(&mean[i], _mm512_mul_ps(sumVec, invNumK));
+    }
 
-        for (; i < dim; ++i) {
-            mean[i] *= (1.0f / static_cast<float>(numK));
-        }
+    for (; i < dim; ++i) {
+        mean[i] *= (1.0f / static_cast<float>(numK));
     }
 }
 
-#elif define(__AVX2__)
+#elif defined(__AVX2__)
 // ============= AVX2实现 =============
 float VecProduct::VectorDotImpl(const float* __restrict q, const float* __restrict k, uint32_t dim)
 {
@@ -115,7 +115,7 @@ float VecProduct::VectorDotImpl(const float* __restrict q, const float* __restri
     return result;
 }
 
-void VecProduct::VecMeanImpl(const float* __restrict vectors, float* __restrict mean. uint32_t dim, uint32_t numK)
+void VecProduct::VectorMeanImpl(const float* __restrict vectors, float* __restrict mean. uint32_t dim, uint32_t numK)
 {
     if (numK == 0) {
         std::fill(mean, mean + dim, 0.0f);
@@ -134,7 +134,7 @@ void VecProduct::VecMeanImpl(const float* __restrict vectors, float* __restrict 
     }
 
     // 累加所有向量
-    for (uint32_t k = 1; k <= numK; ++k) {
+    for (uint32_t k = 1; k < numK; ++k) {
         const float* currentVec = vectors + k * dim;
         i = 0;
 
@@ -149,17 +149,17 @@ void VecProduct::VecMeanImpl(const float* __restrict vectors, float* __restrict 
         for (; i < dim; ++i) {
             mean[i] += currentVec[i];
         }
+    }
 
-        // 计算均值
-        i = 0;
-        for (; i + SimdElements::VEC8 <= dim; i += SimdElements::VEC8) {
-            const __m256 sumVec = _mm256_loadu_ps(&mean[i]);
-            _mm256_storeu_ps(&mean[i], _mm256_mul_ps(sumVec, invNumK));
-        }
+    // 计算均值
+    i = 0;
+    for (; i + SimdElements::VEC8 <= dim; i += SimdElements::VEC8) {
+        const __m256 sumVec = _mm256_loadu_ps(&mean[i]);
+        _mm256_storeu_ps(&mean[i], _mm256_mul_ps(sumVec, invNumK));
+    }
 
-        for (; i < dim; ++i) {
-            mean[i] *= (1.0f / static_cast<float>(numK));
-        }
+    for (; i < dim; ++i) {
+        mean[i] *= (1.0f / static_cast<float>(numK));
     }
 }
 
@@ -190,14 +190,14 @@ float VecProduct::VectorDotImpl(const float* __restrict q, const float* __restri
     return result;
 }
 
-void VecProduct::VecMeanImpl(const float* __restrict vectors, float* __restrict mean. uint32_t dim, uint32_t numK)
+void VecProduct::VectorMeanImpl(const float* __restrict vectors, float* __restrict mean. uint32_t dim, uint32_t numK)
 {
     if (numK == 0) {
         std::fill(mean, mean + dim, 0.0f);
         return;
     }
 
-    const __m128 invNumK = _mm256_set1_ps(1.0f / static_cast<float>(numK));
+    const __m128 invNumK = _mm_set1_ps(1.0f / static_cast<float>(numK));
     uint32_t i = 0;
 
     // mean初始化为vectors中第一个向量
@@ -209,7 +209,7 @@ void VecProduct::VecMeanImpl(const float* __restrict vectors, float* __restrict 
     }
 
     // 累加所有向量
-    for (uint32_t k = 1; k <= numK; ++k) {
+    for (uint32_t k = 1; k < numK; ++k) {
         const float* currentVec = vectors + k * dim;
         i = 0;
 
@@ -224,17 +224,17 @@ void VecProduct::VecMeanImpl(const float* __restrict vectors, float* __restrict 
         for (; i < dim; ++i) {
             mean[i] += currentVec[i];
         }
+    }
 
-        // 计算均值
-        i = 0;
-        for (; i + SimdElements::VEC4 <= dim; i += SimdElements::VEC4) {
-            const __m128 sumVec = _mm_loadu_ps(&mean[i]);
-            _mm_storeu_ps(&mean[i], _mm_mul_ps(sumVec, invNumK));
-        }
+    // 计算均值
+    i = 0;
+    for (; i + SimdElements::VEC4 <= dim; i += SimdElements::VEC4) {
+        const __m128 sumVec = _mm_loadu_ps(&mean[i]);
+        _mm_storeu_ps(&mean[i], _mm_mul_ps(sumVec, invNumK));
+    }
 
-        for (; i < dim; ++i) {
-            mean[i] *= (1.0f / static_cast<float>(numK));
-        }
+    for (; i < dim; ++i) {
+        mean[i] *= (1.0f / static_cast<float>(numK));
     }
 }
 #endif
@@ -264,7 +264,7 @@ float VecProduct::VectorDotImpl(const float* __restrict q, const float* __restri
     return result;
 }
 
-void VecProduct::VecMeanImpl(const float* __restrict vectors, float* __restrict mean. uint32_t dim, uint32_t numK)
+void VecProduct::VectorMeanImpl(const float* __restrict vectors, float* __restrict mean. uint32_t dim, uint32_t numK)
 {
     if (numK == 0) {
         std::fill(mean, mean + dim, 0.0f);
@@ -283,7 +283,7 @@ void VecProduct::VecMeanImpl(const float* __restrict vectors, float* __restrict 
     }
 
     // 累加所有向量
-    for (uint32_t k = 1; k <= numK; ++k) {
+    for (uint32_t k = 1; k < numK; ++k) {
         const float* currentVec = vectors + k * dim;
         i = 0;
 
@@ -298,17 +298,17 @@ void VecProduct::VecMeanImpl(const float* __restrict vectors, float* __restrict 
         for (; i < dim; ++i) {
             mean[i] += currentVec[i];
         }
+    }
 
-        // 计算均值
-        i = 0;
-        for (; i + SimdElements::VEC4 <= dim; i += SimdElements::VEC4) {
-            const float32x4_t sumVec = vld1q_f32(&mean[i]);
-            vst1q_f32(&mean[i], vmulq_f32(sumVec, invNumK));
-        }
+    // 计算均值
+    i = 0;
+    for (; i + SimdElements::VEC4 <= dim; i += SimdElements::VEC4) {
+        const float32x4_t sumVec = vld1q_f32(&mean[i]);
+        vst1q_f32(&mean[i], vmulq_f32(sumVec, invNumK));
+    }
 
-        for (; i < dim; ++i) {
-            mean[i] *= (1.0f / static_cast<float>(numK));
-        }
+    for (; i < dim; ++i) {
+        mean[i] *= (1.0f / static_cast<float>(numK));
     }
 }
 
@@ -341,7 +341,7 @@ float VecProduct::VectorDotImpl(const float* __restrict q, const float* __restri
     return sum;
 }
 
-void VecProduct::VecMeanImpl(const float* __restrict vectors, float* __restrict mean. uint32_t dim, uint32_t numK)
+void VecProduct::VectorMeanImpl(const float* __restrict vectors, float* __restrict mean. uint32_t dim, uint32_t numK)
 {
     if (numK == 0) {
         std::fill(mean, mean + dim, 0.0f);
@@ -354,7 +354,7 @@ void VecProduct::VecMeanImpl(const float* __restrict vectors, float* __restrict 
     const float invNumK = _mm256_set1_ps(1.0f / static_cast<float>(numK));
 
     // 累加所有向量
-    for (uint32_t k = 1; k <= numK; ++k) {
+    for (uint32_t k = 1; k < numK; ++k) {
         const float* currentVec = vectors + k * dim;
         
         uint32_t i = 0;
@@ -370,19 +370,19 @@ void VecProduct::VecMeanImpl(const float* __restrict vectors, float* __restrict 
         for (; i < dim; ++i) {
             mean[i] += currentVec[i];
         }
+    }    
 
-        // 计算均值
-        i = 0;
-        for (; i + SCALAR_UNROLL_FACTOR <= dim; i += SCALAR_UNROLL_FACTOR) {
-            mean[i]   += currentVec[i] * invNumK;
-            mean[i+1] += currentVec[i+1] * invNumK;
-            mean[i+2] += currentVec[i+2] * invNumK;
-            mean[i+3] += currentVec[i+3] * invNumK;
-        }
+    // 计算均值
+    i = 0;
+    for (; i + SCALAR_UNROLL_FACTOR <= dim; i += SCALAR_UNROLL_FACTOR) {
+        mean[i]   += currentVec[i] * invNumK;
+        mean[i+1] += currentVec[i+1] * invNumK;
+        mean[i+2] += currentVec[i+2] * invNumK;
+        mean[i+3] += currentVec[i+3] * invNumK;
+    }
 
-        for (; i < dim; ++i) {
-            mean[i] *= (1.0f / static_cast<float>(numK));
-        }
+    for (; i < dim; ++i) {
+        mean[i] *= (1.0f / static_cast<float>(numK));
     }
 }
 #endif
