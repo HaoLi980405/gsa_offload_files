@@ -6,7 +6,7 @@ import os
 PYTORCH_PATH = os.path.dirname(os.path.abspath(torch.__file__))
 
 INCLUDE_DIRS = [
-    os.path.join(PYTORCH_PATH, 'include/torch/include/torch/csrc/api/include'),
+    os.path.join(PYTORCH_PATH, 'include/torch/csrc/api/include'),
     os.path.join(PYTORCH_PATH, 'include'),
     pybind11.get_include(),
     './include'
@@ -51,4 +51,5 @@ setup(
     name='gsa_offload_ops',
     version='0.1',
     ext_modules=[ext_module],
+
 )
