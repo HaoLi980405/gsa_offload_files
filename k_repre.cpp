@@ -3,7 +3,7 @@
 #include "k_repre.h"
 
 
-namespace KRrepre {
+namespace KRepre {
 #define OMP_THREAD_NUM 32u
 
 const VecProductClass& KRepreComputer::ThreadLocalVecProduct::GetInstance()
@@ -12,7 +12,7 @@ const VecProductClass& KRepreComputer::ThreadLocalVecProduct::GetInstance()
     return instance;
 }
 
-void ComputeKRepreBlock(const float* __restrict kArray,
+void KRepreComputer::ComputeKRepreBlock(const float* __restrict kArray,
                         uint32_t kHead,
                         uint32_t blockSize,
                         uint32_t headSize,
@@ -34,15 +34,15 @@ void ComputeKRepreBlock(const float* __restrict kArray,
     }
 }
     
-void ComputeKRepre(const std::vector<float*>& kArray,
+void KRepreComputer::ComputeKRepre(const std::vector<float*>& kArray,
                    uint32_t numBlock,
                    uint32_t kHead,
                    uint32_t blockSize,
                    uint32_t headSize,
                    const std::vector<float*>& kRepreBlockArray) const
 {
-    #pragma omp parallel for num_threads(OMP_THREAD_NUM)
-    for (uint32_t idxBlock; idxBlock < numBlock; ++idxBlock) {
+#pragma omp parallel for num_threads(OMP_THREAD_NUM)
+    for (uint32_t idxBlock = 0; idxBlock < numBlock; ++idxBlock) {
         const float* kArrayCurrentBlock = kArray[idxBlock];
         float * KRepreCurrentBlock = kRepreBlockArray[idxBlock];
 
