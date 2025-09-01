@@ -36,7 +36,7 @@ float VecProduct::VectorDotImpl(const float* __restrict q, const float* __restri
     return result;
 }
 
-void VecProduct::VectorMeanImpl(const float* __restrict vectors, float* __restrict mean. uint32_t dim, uint32_t numK)
+void VecProduct::VectorMeanImpl(const float* __restrict vectors, float* __restrict mean, uint32_t dim, uint32_t numK)
 {
     if (numK == 0) {
         std::fill(mean, mean + dim, 0.0f);
@@ -115,7 +115,7 @@ float VecProduct::VectorDotImpl(const float* __restrict q, const float* __restri
     return result;
 }
 
-void VecProduct::VectorMeanImpl(const float* __restrict vectors, float* __restrict mean. uint32_t dim, uint32_t numK)
+void VecProduct::VectorMeanImpl(const float* __restrict vectors, float* __restrict mean, uint32_t dim, uint32_t numK)
 {
     if (numK == 0) {
         std::fill(mean, mean + dim, 0.0f);
@@ -190,7 +190,7 @@ float VecProduct::VectorDotImpl(const float* __restrict q, const float* __restri
     return result;
 }
 
-void VecProduct::VectorMeanImpl(const float* __restrict vectors, float* __restrict mean. uint32_t dim, uint32_t numK)
+void VecProduct::VectorMeanImpl(const float* __restrict vectors, float* __restrict mean, uint32_t dim, uint32_t numK)
 {
     if (numK == 0) {
         std::fill(mean, mean + dim, 0.0f);
@@ -264,7 +264,7 @@ float VecProduct::VectorDotImpl(const float* __restrict q, const float* __restri
     return result;
 }
 
-void VecProduct::VectorMeanImpl(const float* __restrict vectors, float* __restrict mean. uint32_t dim, uint32_t numK)
+void VecProduct::VectorMeanImpl(const float* __restrict vectors, float* __restrict mean, uint32_t dim, uint32_t numK)
 {
     if (numK == 0) {
         std::fill(mean, mean + dim, 0.0f);
@@ -341,7 +341,7 @@ float VecProduct::VectorDotImpl(const float* __restrict q, const float* __restri
     return sum;
 }
 
-void VecProduct::VectorMeanImpl(const float* __restrict vectors, float* __restrict mean. uint32_t dim, uint32_t numK)
+void VecProduct::VectorMeanImpl(const float* __restrict vectors, float* __restrict mean, uint32_t dim, uint32_t numK)
 {
     if (numK == 0) {
         std::fill(mean, mean + dim, 0.0f);
