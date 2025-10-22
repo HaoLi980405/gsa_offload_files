@@ -76,5 +76,3 @@ vllm serve "$MODEL_PATH" \
     --block-size "$BLOCK_SIZE" \
     $ENABLE_PREFIX_CACHING \
     --kv-transfer-config "$KV_TRANSFER_CONFIG"
-
-echo "$(date): ✅ vLLM 服务启动完成"
